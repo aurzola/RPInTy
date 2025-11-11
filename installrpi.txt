@@ -1,0 +1,38 @@
+install fresh retropie, enable ssh, i2c, keyb
+disable emulationstation in /opt/retropie/configs/all/autostart.sh
+https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/
+sudo apt-get update
+sudo apt-get install python-smbus
+sudo apt-get install i2c-tools
+sudo apt install python3-pip
+
+pi@retropie:~/Adafruit_Python_SSD1306 $ sudo i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- 3c -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+git clone  https://github.com/adafruit/Adafruit_Python_SSD13
+cd Adafruit_Python_SSD1306
+sudo apt-get install python3-setuptools
+sudo apt-get install python3-pip
+
+sudo python3 setup.py install
+pip3 install Pillow
+#para jzintv
+sudo apt install libwayland-cursor0
+vi /opt/retropie/configs/all/autostart.sh add:
+(cd /home/pi/jzintv-20200712-linux-rpi-sdl2/; nohup ./push_button.py &) > /dev/null
+
+https://retropie.org.uk/docs/FAQ/#how-do-i-hide-the-boot-text
+
+Install for oled SH1107: https://luma-oled.readthedocs.io/en/latest/software.html
+
+sudo python3 -m pip install --upgrade luma.oled
+
+
