@@ -6,16 +6,18 @@
  jzintv homepage:   http://spatula-city.org/~im14u2c/intv
 
 
-RPI OS Setup
+RPI 3 OS Setup
 -----------
 
 sudo dd if=2025-05-13-raspios-bookworm-armhf-lite.img of=/dev/sda1 bs=512
 
-Raspberry Pi 3 with 2019-07-10-raspbian-buster-lite.img, both with the default Broadcom blobs & the KMS/DRM backend:
+SDL 2 with the default Broadcom blobs & the KMS/DRM backend:
+-----------------------------------------------------------
 
 Make sure your user is in the input group & relogin:
 
-sudo adduser <username> input
+sudo adduser pi input
+
 Install SDL2 build dependencies:
 
 # install everything Debian uses to build SDL
@@ -23,6 +25,7 @@ sudo apt build-dep libsdl2
 
 # needed for the KMSDRM backend:
 sudo apt install libdrm-dev libgbm-dev
+
 Grab the latest stable SDL source tarball or tag (release-2.0.10) from Git and extract it somewhere like ~/sdl-src
 
 Run SDL's configure script:
@@ -102,4 +105,37 @@ SDL_RENDER_DRIVER available: opengl opengles2 opengles software
 SDL_RENDER_DRIVER selected : opengl
 
 Here's the test program I've been using: [main.cpp](https://github.com/aurzola/RPInTy/blob/master/main.cpp).
+
+
+How to set default audio output on Raspberry Pi to hdmi?
+
+Audio didn't go through and I couldn't change default output in raspi-config.
+
+
+edit ~/boot/config.txt
+
+uncomment:
+
+hdmi_drive=2
+
+change this line
+
+dtoverlay=vc4-kms-v3d
+
+to
+
+dtoverlay=vc4-fkms-v3d
+
+save the file and reboot the system.
+After reboot, open raspi-config , HDMI output should be default option now.
+
+
+Change Default Audio Outout from CLI:
+
+sudo raspi-config nonint do_audio <N>
+On Raspberry Pi 4B, you can use the following options:
+
+0: bcm2835 headphone jack
+
+1: vc4-hdmi-0
 

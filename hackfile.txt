@@ -4,8 +4,8 @@
 map 0      ; activate with F5
 ; -----------------------------------------------------------------------------------------
 JS0_BTN_16 PAUSE
-JS0_BTN_17 RESET
-JS0_BTN_18 QUIT
+;JS0_BTN_17 RESET
+;JS0_BTN_18 QUIT
 
 
 ; map for the Raphnet - joystick #0 - left controller
@@ -45,8 +45,8 @@ JS0_NNW    PD0L_J_NNW
 
 ; map for the Raphnet - joystick #1 - right controller
 JS1_BTN_16 PAUSE
-JS1_BTN_17 RESET
-JS1_BTN_18 QUIT
+;JS1_BTN_17 RESET
+;JS1_BTN_18 QUIT
 
 JS1_BTN_00 PD0R_A_T
 JS1_BTN_01 PD0R_A_L
