@@ -106,8 +106,10 @@ pos=1
 video = os.popen('tvservice -s').read()
 if video.find("HDMI") > -1: 
    video="-z3" #z4 looks good on big tv
+   os.system("sudo raspi-config nonint do_audio 1")
 else:
    video="-z1"
+   os.system("sudo raspi-config nonint do_audio 0")
 
 # 128x32 device with hardware I2C:
 serial = i2c(port=1, address=0x3C)

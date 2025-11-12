@@ -139,3 +139,85 @@ On Raspberry Pi 4B, you can use the following options:
 
 1: vc4-hdmi-0
 
+StreamLine StartUp Time
+-----------------------+
+
+sudo systemctl disable avahi-daemon
+sudo systemctl disable bluetooth
+sudo systemctl disable triggerhappy
+sudo systemctl disable rng-tools
+sudo systemctl disable wpa_supplicant
+sudo systemctl disable hciuart
+sudo systemctl disable bluetooth
+
+Add these lines to /boot/config.txt:
+
+# Disable Bluetooth
+dtoverlay=disable-bt
+
+# Disable WiFi (if you don't need it)
+dtoverlay=disable-wifi
+
+Edit /boot/cmdline.txt and add these parameters:
+
+consoleblank=0 logo.nologo quiet loglevel=0 rootwait fastboot noswap
+
+Static IP
+
+sudo systemctl disable dhcpcd
+sudo systemctl mask dhcpcd  # prevents accidental start
+
+Then configure static IP in /etc/network/interfaces:
+
+bash
+auto eth0
+iface eth0 inet static
+    address 192.168.1.100
+    netmask 255.255.255.0
+    gateway 192.168.1.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+
+
+Additional Boot Optimizations
+Edit /etc/systemd/system.conf:
+
+sudo nano /etc/systemd/system.conf
+Uncomment and modify:
+
+DefaultTimeoutStartSec=1s
+DefaultTimeoutStopSec=1s
+
+
+Setup OLED Interface
+--------------------
+
+sudo apt-get update
+sudo apt-get install python-smbus
+sudo apt-get install i2c-tools
+
+Test commnunication with OLED:
+
+sudo i2cdetect -y 1
+
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- 3c -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+
+sudo apt install python3-pip
+
+pip3 install Pillow
+
+Install for oled SH1107: https://luma-oled.readthedocs.io/en/latest/software.html
+
+sudo apt-get install python3 python3-pip python3-pil libjpeg-dev zlib1g-dev libfreetype6-dev liblcms2-dev libopenjp2-7 libtiff5 -y
+sudo python3 -m pip install --upgrade luma.oled
+sudo usermod -a -G spi,gpio,i2c pi
+
+
