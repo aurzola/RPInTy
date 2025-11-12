@@ -6,6 +6,7 @@ import os
 import sys
 from luma.core.interface.serial import i2c
 from luma.oled.device import sh1107
+import subprocess, time, shlex, os, signal
 
 
 from PIL import Image
@@ -19,6 +20,25 @@ roms = [f for f in roms  if '.int' in f]
 roms = [sub[: -4] for sub in roms]
 roms.sort()
 #print(*roms, sep="\n")
+
+
+def start_emulator(romfile):
+    # Stop any running instance cleanly
+    subprocess.run(["killall", "-q", "jzintv"])
+    time.sleep(0.5)  # give EGL driver time to clean up
+
+    emucmd = [
+        "bin/jzintv",
+        video,
+        "--kbdhackfile=hackfile.txt",
+        f"rom/{romfile}"
+    ]
+    env = os.environ.copy()
+    env["SDL_VIDEO_EGL_DRIVER"] = "libEGL.so"
+    env["SDL_VIDEO_GL_DRIVER"] = "libGLESv2.so"
+
+    # start without blocking the main script
+    subprocess.Popen(emucmd, env=env)
 
 def initDisplay():
   global device, image, font, draw
@@ -99,8 +119,7 @@ def button_callback(channel):
         print(roms[selected])
         pos=-999
     if channel == 18 or channel == 24:
-        os.system('killall jzintv')
-        os.system("bin/jzintv " + video + " --kbdhackfile=hackfile.txt '" + roms[selected] + "' & ")
+       start_emulator(roms[selected])
 
 pos=1
 video = os.popen('tvservice -s').read()
@@ -133,7 +152,10 @@ GPIO.add_event_detect(23,GPIO.RISING,callback=button_callback)
 GPIO.setup(24, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) 
 GPIO.add_event_detect(24,GPIO.RISING,callback=button_callback) 
 
-os.system("bin/jzintv " + video + " --kbdhackfile=hackfile.txt 'INTV - Intelligent TV Demo Intl. #5859 (1982).int' & ")
+#emucmd = "SDL_VIDEO_EGL_DRIVER=libEGL.so SDL_VIDEO_GL_DRIVER=libGLESv2.so bin/jzintv "
+#os.system(emucmd + video + " --kbdhackfile=hackfile.txt 'INTV - Intelligent TV Demo Intl. #5859 (1982) (Mattel).int' & ")
+start_emulator('INTV - Intelligent TV Demo Intl. #5859 (1982) (Mattel).int')
+
 updateDisplay()
 GPIO.cleanup() 
 print("all done")
