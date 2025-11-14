@@ -220,4 +220,25 @@ sudo apt-get install python3 python3-pip python3-pil libjpeg-dev zlib1g-dev libf
 sudo python3 -m pip install --upgrade luma.oled
 sudo usermod -a -G spi,gpio,i2c pi
 
+Python script start on boot
+-----------------------------
 
+sudo nano /etc/systemd/system/myscript.service:
+
+[Unit]
+Description=Run push_button script once at boot
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/src/jzintv-20200712-src
+ExecStart=/usr/bin/python3 /home/pi/src/jzintv-20200712-src/push_button.py
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
+sudo systemctl daemon-reload
+sudo systemctl enable myscript.service
+
+test: sudo systemctl start myscript.service
