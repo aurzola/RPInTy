@@ -9,7 +9,9 @@
 RPI 3 OS Setup
 -----------
 
-sudo dd if=2025-05-13-raspios-bookworm-armhf-lite.img of=/dev/sda1 bs=512
+sudo dd if=2025-05-13-raspios-bookworm-armhf-lite.img of=/dev/sda1 bs=512 (this image Workd)
+
+2025-10-01-raspios-bookworm-arm64-lite.img
 
 SDL 2 with the default Broadcom blobs & the KMS/DRM backend:
 -----------------------------------------------------------
@@ -106,13 +108,19 @@ SDL_RENDER_DRIVER selected : opengl
 
 Here's the test program I've been using: [main.cpp](https://github.com/aurzola/RPInTy/blob/master/main.cpp).
 
+jzintv
+--------
+
+cd src/jzintv-20200712-src/
+sudo apt-get install libreadline-dev
+make -j4
 
 How to set default audio output on Raspberry Pi to hdmi?
 
 Audio didn't go through and I couldn't change default output in raspi-config.
 
 
-edit ~/boot/config.txt
+edit ~/boot/firmware/config.txt
 
 uncomment:
 
@@ -150,7 +158,7 @@ sudo systemctl disable wpa_supplicant
 sudo systemctl disable hciuart
 sudo systemctl disable bluetooth
 
-Add these lines to /boot/config.txt:
+Add these lines to /boot/firmware/config.txt:
 
 # Disable Bluetooth
 dtoverlay=disable-bt
@@ -158,7 +166,7 @@ dtoverlay=disable-bt
 # Disable WiFi (if you don't need it)
 dtoverlay=disable-wifi
 
-Edit /boot/cmdline.txt and add these parameters:
+Edit /boot/firmware/cmdline.txt and add these parameters:
 
 consoleblank=0 logo.nologo quiet loglevel=0 rootwait fastboot noswap
 
@@ -167,25 +175,10 @@ Static IP
 sudo systemctl disable dhcpcd
 sudo systemctl mask dhcpcd  # prevents accidental start
 
-Then configure static IP in /etc/network/interfaces:
-
-bash
-auto eth0
-iface eth0 inet static
-    address 192.168.1.100
-    netmask 255.255.255.0
-    gateway 192.168.1.1
-    dns-nameservers 8.8.8.8 8.8.4.4
-
+Then configure static IP with sudo nmtui
 
 Additional Boot Optimizations
 Edit /etc/systemd/system.conf:
-
-sudo nano /etc/systemd/system.conf
-Uncomment and modify:
-
-DefaultTimeoutStartSec=1s
-DefaultTimeoutStopSec=1s
 
 
 Setup OLED Interface
@@ -217,13 +210,33 @@ pip3 install Pillow
 Install for oled SH1107: https://luma-oled.readthedocs.io/en/latest/software.html
 
 sudo apt-get install python3 python3-pip python3-pil libjpeg-dev zlib1g-dev libfreetype6-dev liblcms2-dev libopenjp2-7 libtiff5 -y
-sudo python3 -m pip install --upgrade luma.oled
 sudo usermod -a -G spi,gpio,i2c pi
+When doing: sudo python3 -m pip install --upgrade luma.oled
+× This environment is externally managed
+╰─> To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to
+    install.
+    
+    If you wish to install a non-Debian-packaged Python package,
+    create a virtual environment using python3 -m venv path/to/venv.
+    Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+    sure you have python3-full installed.
+    
+    For more information visit http://rptl.io/venv
+
+note: If you believe this is a mistake, please contact your Python installation or OS distribution provider. You can override this, at the risk of breaking your Python installation or OS, by passing --break-system-packages.
+hint: See PEP 668 for the detailed specification.
+
+Then DO:
+
+python3 -m venv ~/oled-env
+source ~/oled-env/bin/activate
+pip install RPi.GPIO luma.oled
 
 Python script start on boot
 -----------------------------
 
-sudo nano /etc/systemd/system/myscript.service:
+sudo vi /etc/systemd/system/myscript.service
 
 [Unit]
 Description=Run push_button script once at boot
@@ -231,12 +244,13 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/pi/src/jzintv-20200712-src
-ExecStart=/usr/bin/python3 /home/pi/src/jzintv-20200712-src/push_button.py
+ExecStart=/home/pi/oled-env/bin/python3 /home/pi/src/jzintv-20200712-src/push_button.py
 Type=oneshot
 RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target
+
 
 sudo systemctl daemon-reload
 sudo systemctl enable myscript.service
